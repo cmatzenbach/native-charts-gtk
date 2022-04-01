@@ -1,16 +1,16 @@
 (defsystem "native-charts-gtk"
   :version "0.1.0"
-  :author ""
+  :author "Chris Matzenbach"
   :license ""
-  :depends-on ()
+  :depends-on ("cl-cffi-gtk")
   :components ((:module "src"
                 :components
                 ((:file "main"))))
-  :description ""
+  :description "HEAVY.AI 2022 Hackathon Project"
   :in-order-to ((test-op (test-op "native-charts-gtk/tests"))))
 
 (defsystem "native-charts-gtk/tests"
-  :author ""
+  :author "Chris Matzenbach"
   :license ""
   :depends-on ("native-charts-gtk"
                "rove")

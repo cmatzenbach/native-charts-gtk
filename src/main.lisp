@@ -1,3 +1,5 @@
+(defpackage native-charts-gtk
+  (:use :cl))
 (in-package :native-charts-gtk)
 
 ;; main window

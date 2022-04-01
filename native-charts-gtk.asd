@@ -5,7 +5,8 @@
   :depends-on ("cl-cffi-gtk")
   :components ((:module "src"
                 :components
-                ((:file "main"))))
+                ((:file "packages") 
+                 (:file "main" :depends-on ("packages")))))
   :description "HEAVY.AI 2022 Hackathon Project"
   :in-order-to ((test-op (test-op "native-charts-gtk/tests"))))
 

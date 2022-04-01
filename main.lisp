@@ -1,3 +1,5 @@
+(in-package :native-charts-gtk)
+
 ;; main window
 (defvar window (make-instance 'gtk:gtk-window :type :toplevel :title "Bleep"))
 (defvar vbox (make-instance 'gtk:gtk-box :orientation :vertical

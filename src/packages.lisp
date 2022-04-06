@@ -1,2 +1,2 @@
 (defpackage native-charts-gtk
-  (:use cl))
+  (:use :gtk :gdk :gdk-pixbuf :gobject :glib :gio :pango :cairo :common-lisp))

@@ -32,7 +32,7 @@
 (defun button-clicked (btn-num)
   (format t "Button ~A was pressed my dude!~%" btn-num))
 
-(defun hello-world ()
+(defun clickable-buttons-with-event-handlers-demo ()
   ;; in the docs, this is example-upgraded-hello-world-2.
   (gtk:within-main-loop
     (let ((window (make-instance 'gtk-window
@@ -63,12 +63,22 @@
       (gtk:gtk-container-add window box)
       (gtk:gtk-widget-show-all window))))
 
-;; (defun simple-gtk-chart ()
-;;   )
-
-;; (defun connect-heavy-db ()
-;;   )
-
+(defun cairo-stroke-callback (widget cr)
+  (let ((cr (pointer cr))
+        ;; Get the GdkWindow for the widget
+        (window (gtk:gtk-widget-window widget)))
+    ;; Clear surface
+    (cairo:cairo-set-source-rgb cr 1.0 1.0 1.0)
+    (cairo:cairo-paint cr)
+    ;; Example is in 1.0 x 1.0 coordinate space
+    (cairo:cairo-scale cr
+                       (gdk:gdk-window-get-width window)
+                       (gdk:gdk-window-get-height window))
+    ;; Drawing code goes here
+    (cairo:cairo-set-line-width cr 0.1)
+    (cairo:cairo-set-source-rgb cr 1.0 0.0 0.0)
+    (cairo:cairo-rectangle cr 0.25 0.25 0.5 0.5)
+    (cairo:cairo-stroke cr)))
 
 (defun demo-cairo-stroke ()
   (gtk:within-main-loop
@@ -77,35 +87,16 @@
                                  :title "Demo Cairo Stroke"
                                  :border-width 12
                                  :default-width 400
-                                 :default-height 400)))
+                                 :default-height 400))
+          (area (make-instance 'gtk-drawing-area)))
+      (gobject:g-signal-connect area "draw" #'cairo-stroke-callback)
       (gobject:g-signal-connect window "destroy"
                         (lambda (widget)
                           (declare (ignore widget))
                           (gtk:leave-gtk-main)))
-      ;; Signals used to handle the backing surface
-      (gobject:g-signal-connect window "draw"
-         (lambda (widget cr)
-           (let ((cr (pointer cr))
-                 ;; Get the GdkWindow for the widget
-                 (window (gtk:gtk-widget-window widget)))
-           ;; Clear surface
-           (cairo:cairo-set-source-rgb cr 1.0 1.0 1.0)
-           (cairo:cairo-paint cr)
-           ;; Example is in 1.0 x 1.0 coordinate space
-           (cairo:cairo-scale cr
-                        (gdk:gdk-window-get-width window)
-                        (gdk:gdk-window-get-height window))
-           ;; Drawing code goes here
-           (cairo:cairo-set-line-width cr 0.1)
-           (cairo:cairo-set-source-rgb cr 1.0 0.0 0.0)
-           (cairo:cairo-rectangle cr 0.25 0.25 0.5 0.5)
-           (cairo:cairo-stroke cr)
-           ;; Destroy the Cario context
-           (cairo:cairo-destroy cr)
-           t)))
+      (gtk:gtk-container-add window area)
       (gtk:gtk-widget-show-all window))))
 
-;; (demo-cairo-stroke)
 
 (defun demo-cairo-set-source-rgba ()
   (gtk:within-main-loop
@@ -156,62 +147,62 @@
 
 ;; (demo-cairo-set-source-rgba)
 
-(defun demo-cairo-set-source-gradient ()
-  (gtk:within-main-loop
-    (let ((window (make-instance 'gtk-window
-                                 :type :toplevel
-                                 :title "Demo Cairo Set Source Gradient"
-                                 :border-width 12
-                                 :default-width 400
-                                 :default-height 400)))
-      (gobject:g-signal-connect window "destroy"
-                        (lambda (widget)
-                          (declare (ignore widget))
-                          (gtk:leave-gtk-main)))
-      ;; Signals used to handle the backing surface
-      (gobject:g-signal-connect window "draw"
-         (lambda (widget cr)
-           (let ((cr (pointer cr))
-                 ;; Get the GdkWindow for the widget
-                 (window (gtk:gtk-widget-window widget)))
-           ;; Clear surface
-           (cairo:cairo-set-source-rgb cr 1.0 1.0 1.0)
-           (cairo:cairo-paint cr)
-           ;; Example is in 1.0 x 1.0 coordinate space
-           (cairo:cairo-scale cr
-                        ;; (gdk:gdk-window-get-width window)
-                        (gdk:gdk-window-get-width window)
-                        (gdk:gdk-window-get-height window))
-           ;; Drawing code goes here
-           (let ((radpat (cairo:cairo-pattern-create-radial 0.25 0.25 0.10
-                                                      0.50 0.50 0.50))
-                 (linpat (cairo:cairo-pattern-create-linear 0.25 0.35 0.75 0.65)))
-             (cairo:cairo-pattern-add-color-stop-rgb radpat 0.00 1.00 0.80 0.80)
-             (cairo:cairo-pattern-add-color-stop-rgb radpat 1.00 0.90 0.00 0.00)
-             (iterate:iter (for i from 1 below 10)
-                   (iterate:iter (for j from 1 below 10)
-                         (cairo:cairo-rectangle cr
-                                          (- (/ i 10.0) 0.04)
-                                          (- (/ j 10.0) 0.04)
-                                          0.08
-                                          0.08)))
-             (cairo:cairo-set-source cr radpat)
-             (cairo:cairo-fill cr)
-             (cairo:cairo-pattern-add-color-stop-rgba linpat 0.00 1.0 1.0 1.0 0.0)
-             (cairo:cairo-pattern-add-color-stop-rgba linpat 0.25 0.0 1.0 0.0 0.5)
-             (cairo:cairo-pattern-add-color-stop-rgba linpat 0.50 1.0 1.0 1.0 0.0)
-             (cairo:cairo-pattern-add-color-stop-rgba linpat 0.75 0.0 0.0 1.0 0.5)
-             (cairo:cairo-pattern-add-color-stop-rgba linpat 1.00 1.0 1.0 1.0 0.0)
-             (cairo:cairo-rectangle cr 0.0 0.0 1.0 1.0)
-             (cairo:cairo-set-source cr linpat)
-             (cairo:cairo-fill cr))
-           ;; Destroy the Cairo context
-           (cairo:cairo-destroy cr)
-           t)))
+
+  ;; Signals used to handle the backing surface
+(defun cairo-set-source-gradient (widget cr)
+  (let ((cr (pointer cr))
+        ;; Get the GdkWindow for the widget
+        (window (gtk:gtk-widget-window widget)))
+    ;; Clear surface
+    (cairo:cairo-set-source-rgb cr 1.0 1.0 1.0)
+    (cairo:cairo-paint cr)
+    ;; Example is in 1.0 x 1.0 coordinate space
+    (cairo:cairo-scale cr
+                       (gdk:gdk-window-get-width window)
+                       (gdk:gdk-window-get-height window))
+    ;; Drawing code goes here
+    (let ((radpat (cairo:cairo-pattern-create-radial 0.25 0.25 0.10
+                                                     0.50 0.50 0.50))
+          (linpat (cairo:cairo-pattern-create-linear 0.25 0.35 0.75 0.65)))
+      (cairo:cairo-pattern-add-color-stop-rgb radpat 0.00 1.00 0.80 0.80)
+      (cairo:cairo-pattern-add-color-stop-rgb radpat 1.00 0.90 0.00 0.00)
+      (loop for i from 1 below 10 do
+        (loop for j from 1 below 10 do
+          (cairo:cairo-rectangle cr
+                                 (- (/ i 10.0) 0.04)
+                                 (- (/ j 10.0) 0.04)
+                                 0.08
+                                 0.08)))
+      (cairo:cairo-set-source cr radpat)
+      (cairo:cairo-fill cr)
+      (cairo:cairo-pattern-add-color-stop-rgba linpat 0.00 1.0 1.0 1.0 0.0)
+      (cairo:cairo-pattern-add-color-stop-rgba linpat 0.25 0.0 1.0 0.0 0.5)
+      (cairo:cairo-pattern-add-color-stop-rgba linpat 0.50 1.0 1.0 1.0 0.0)
+      (cairo:cairo-pattern-add-color-stop-rgba linpat 0.75 0.0 0.0 1.0 0.5)
+      (cairo:cairo-pattern-add-color-stop-rgba linpat 1.00 1.0 1.0 1.0 0.0)
+      (cairo:cairo-rectangle cr 0.0 0.0 1.0 1.0)
+      (cairo:cairo-set-source cr linpat)
+      (cairo:cairo-fill cr))))
+
+  (defun demo-cairo-set-source-gradient ()
+    (gtk:within-main-loop
+      (let ((window (make-instance 'gtk-window
+                                   :type :toplevel
+                                   :title "Demo Cairo Set Source Gradient"
+                                   :border-width 12
+                                   :default-width 400
+                                   :default-height 400))
+            (area (make-instance 'gtk-drawing-area)))
+        (gobject:g-signal-connect area "draw" #'cairo-set-source-gradient)
+        (gobject:g-signal-connect window "destroy"
+                                  (lambda (widget)
+                                    (declare (ignore widget))
+                                    (gtk:leave-gtk-main)))
+        (gtk:gtk-container-add window area)
         (gtk:gtk-widget-show-all window))))
 
 
-(defun drawing-caps (widget cr)
+(defun cairo-drawing-caps (widget cr)
   (let* ((cr (pointer cr))
          (width (gtk:gtk-widget-get-allocated-width widget))
          (height (gtk:gtk-widget-get-allocated-height widget))
@@ -258,7 +249,7 @@
                       (+ (* 3 offset) line-width))
     (cairo:cairo-stroke cr)))
 
-(defun example-drawing-caps ()
+(defun demo-cairo-drawing-caps ()
   (gtk:within-main-loop
     (let ((window (make-instance 'gtk-window
                                  :type :toplevel
@@ -267,7 +258,7 @@
                                  :default-height 300))
           (area (make-instance 'gtk-drawing-area)))
       ;; Signal handler for the drawing area
-      (gobject:g-signal-connect area "draw" #'drawing-caps)
+      (gobject:g-signal-connect area "draw" #'cairo-drawing-caps)
       ;; Signal handler for the window to handle the signal "destroy".
       (gobject:g-signal-connect window "destroy"
                         (lambda (widget)

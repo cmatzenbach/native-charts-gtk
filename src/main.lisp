@@ -270,115 +270,123 @@
                       (+ (* 3 offset) line-width))
     (cairo:cairo-stroke cr)))
 
-;; (defun demo-cairo-fill ()
-;;   (gtk:within-main-loop
-;;     (let ((window (make-instance 'gtk-window
-;;                                  :type :toplevel
-;;                                  :title "Demo Cairo Fill"
-;;                                  :border-width 12
-;;                                  :default-width 400
-;;                                  :default-height 400)))
-;;       (gobject:g-signal-connect window "destroy"
-;;                         (lambda (widget)
-;;                           (declare (ignore widget))
-;;                           (leave-gtk-main)))
-;;       ;; Signals used to handle the backing surface
-;;       (gobject:g-signal-connect window "draw"
-;;          (lambda (widget cr)
-;;            (let ((cr (pointer cr))
-;;                  ;; Get the GdkWindow for the widget
-;;                  (window (gtk-widget-window widget)))
-;;            ;; Clear surface
-;;            (cairo-set-source-rgb cr 1.0 1.0 1.0)
-;;            (cairo-paint cr)
-;;            ;; Example is in 1.0 x 1.0 coordinate space
-;;            (cairo-scale cr
-;;                         (gdk:gdk-window-width window)
-;;                         (gdk-window-height window))
-;;            ;; Drawing code goes here
-;;            (cairo-set-source-rgb cr 1.0 0.0 0.0)
-;;            (cairo-rectangle cr 0.25 0.25 0.5 0.5)
-;;            (cairo-fill cr)
-;;            ;; Destroy the Cairo context
-;;            (cairo-destroy cr)
-;;            t)))
-;;         (gtk-widget-show-all window))))
 
-;; (defun demo-cairo-text ()
-;;   (gtk:within-main-loop
-;;     (let ((window (make-instance 'gtk-window
-;;                                  :type :toplevel
-;;                                  :title "Demo Cairo Text"
-;;                                  :border-width 12
-;;                                  :default-width 400
-;;                                  :default-height 400)))
-;;       (gobject:g-signal-connect window "destroy"
-;;                         (lambda (widget)
-;;                           (declare (ignore widget))
-;;                           (leave-gtk-main)))
-;;       ;; Signals used to handle the backing surface
-;;       (gobject:g-signal-connect window "draw"
-;;          (lambda (widget cr)
-;;            (let ((cr (pointer cr))
-;;                  ;; Get the GdkWindow for the widget
-;;                  (window (gtk-widget-window widget)))
-;;            ;; Clear surface
-;;            (cairo-set-source-rgb cr 1.0 1.0 1.0)
-;;            (cairo-paint cr)
-;;            ;; Example is in 1.0 x 1.0 coordinate space
-;;            (cairo-scale cr
-;;                         (gdk:gdk-window-width window)
-;;                         (gdk-window-height window))
-;;            ;; Drawing code goes here
-;;            (cairo-set-source-rgb cr 0.0 0.0 0.0)
-;;            (cairo-select-font-face cr "Georgia" :weight :bold)
-;;            (cairo-set-font-size cr 1.2)
-;;            (let ((text-extents (cairo-text-extents cr "a")))
-;;              (cairo-move-to cr
-;;                             (- 0.5
-;;                                (/ (cairo-text-extents-width text-extents) 2)
-;;                                (cairo-text-extents-x-bearing text-extents))
-;;                             (- 0.5
-;;                                (/ (cairo-text-extents-height text-extents) 2)
-;;                                (cairo-text-extents-y-bearing text-extents)))
-;;              (cairo-show-text cr "a"))
-;;            ;; Destroy the Cairo context
-;;            (cairo-destroy cr)
-;;            t)))
-;;         (gtk-widget-show-all window))))
 
-;; (defun demo-cairo-paint ()
-;;   (gtk:within-main-loop
-;;     (let ((window (make-instance 'gtk-window
-;;                                  :type :toplevel
-;;                                  :title "Demo Cairo Paint"
-;;                                  :border-width 12
-;;                                  :default-width 400
-;;                                  :default-height 400)))
-;;       (gobject:g-signal-connect window "destroy"
-;;                         (lambda (widget)
-;;                           (declare (ignore widget))
-;;                           (leave-gtk-main)))
-;;       ;; Signals used to handle the backing surface
-;;       (gobject:g-signal-connect window "draw"
-;;          (lambda (widget cr)
-;;            (let ((cr (pointer cr))
-;;                  ;; Get the GdkWindow for the widget
-;;                  (window (gtk-widget-window widget)))
-;;            ;; Clear surface
-;;            (cairo-set-source-rgb cr 1.0 1.0 1.0)
-;;            (cairo-paint cr)
-;;            ;; Example is in 1.0 x 1.0 coordinate space
-;;            (cairo-scale cr
-;;                         (gdk:gdk-window-width window)
-;;                         (gdk-window-height window))
-;;            ;; Drawing code goes here
-;;            (cairo-set-source-rgb cr 0.0 0.0 0.0)
-;;            (cairo-paint-with-alpha cr 0.5d0)
-;;            ;; Destroy the Cairo context
-;;            (cairo-destroy cr)
-;;            t)))
-;;         (gtk-widget-show-all window))))
+;; makes a square in center of screen and fills it with the color red
+(defun demo-cairo-fill ()
+  (gtk:within-main-loop
+    (let ((window (make-instance 'gtk-window
+                                 :type :toplevel
+                                 :title "Demo Cairo Fill"
+                                 :border-width 12
+                                 :default-width 400
+                                 :default-height 400))
+          (area (make-instance 'gtk-drawing-area)))
+      (gobject:g-signal-connect area "draw" #'cairo-fill-callback)
+      (gobject:g-signal-connect window "destroy"
+                                (lambda (widget)
+                                  (declare (ignore widget))
+                                  (gtk:leave-gtk-main)))
+      ;; Signals used to handle the backing surface
+      (gtk:gtk-container-add window area)
+      (gtk:gtk-widget-show-all window))))
+
+(defun cairo-fill-callback (widget cr)
+  (let ((cr (pointer cr))
+        ;; Get the GdkWindow for the widget
+        (window (gtk:gtk-widget-window widget)))
+    ;; Clear surface
+    (cairo:cairo-set-source-rgb cr 1.0 1.0 1.0)
+    (cairo:cairo-paint cr)
+    ;; Example is in 1.0 x 1.0 coordinate space
+    (cairo:cairo-scale cr
+                       (gdk:gdk-window-get-width window)
+                       (gdk:gdk-window-get-height window))
+    ;; Drawing code goes here
+    (cairo:cairo-set-source-rgb cr 1.0 0.0 0.0)
+    (cairo:cairo-rectangle cr 0.25 0.25 0.5 0.5)
+    (cairo:cairo-fill cr)))
+
+
+
+;; prints a large letter "a" in the window
+(defun demo-cairo-text ()
+  (gtk:within-main-loop
+    (let ((window (make-instance 'gtk-window
+                                 :type :toplevel
+                                 :title "Demo Cairo Text"
+                                 :border-width 12
+                                 :default-width 400
+                                 :default-height 400))
+          (area (make-instance 'gtk-drawing-area)))
+      (gobject:g-signal-connect area "draw" #'cairo-text-callback)
+      (gobject:g-signal-connect window "destroy"
+                                (lambda (widget)
+                                  (declare (ignore widget))
+                                  (gtk:leave-gtk-main)))
+      (gtk:gtk-container-add window area)      
+      (gtk:gtk-widget-show-all window))))
+
+(defun cairo-text-callback (widget cr)
+  (let ((cr (pointer cr))
+        ;; Get the GdkWindow for the widget
+        (window (gtk:gtk-widget-window widget)))
+    ;; Clear surface
+    (cairo:cairo-set-source-rgb cr 1.0 1.0 1.0)
+    (cairo:cairo-paint cr)
+    ;; Example is in 1.0 x 1.0 coordinate space
+    (cairo:cairo-scale cr
+                       (gdk:gdk-window-get-width window)
+                       (gdk:gdk-window-get-height window))
+    ;; Drawing code goes here
+    (cairo:cairo-set-source-rgb cr 0.0 0.0 0.0)
+    (cairo:cairo-select-font-face cr "Georgia" :normal :bold)
+    (cairo:cairo-set-font-size cr 1.2)
+    (let ((text-extents (cairo:cairo-text-extents cr "a")))
+      (cairo:cairo-move-to cr
+                           (- 0.5
+                              (/ (cairo:cairo-text-extents-t-width text-extents) 2)
+                              (cairo:cairo-text-extents-t-x-bearing text-extents))
+                           (- 0.5
+                              (/ (cairo:cairo-text-extents-t-height text-extents) 2)
+                              (cairo:cairo-text-extents-t-y-bearing text-extents)))
+      (cairo:cairo-show-text cr "a"))))
+
+
+
+;; 
+(defun demo-cairo-paint ()
+  (gtk:within-main-loop
+    (let ((window (make-instance 'gtk-window
+                                 :type :toplevel
+                                 :title "Demo Cairo Paint"
+                                 :border-width 12
+                                 :default-width 400
+                                 :default-height 400)))
+      (gobject:g-signal-connect window "destroy"
+                        (lambda (widget)
+                          (declare (ignore widget))
+                          (leave-gtk-main)))
+      ;; Signals used to handle the backing surface
+      (gobject:g-signal-connect window "draw"
+         (lambda (widget cr)
+           (let ((cr (pointer cr))
+                 ;; Get the GdkWindow for the widget
+                 (window (gtk-widget-window widget)))
+           ;; Clear surface
+           (cairo-set-source-rgb cr 1.0 1.0 1.0)
+           (cairo-paint cr)
+           ;; Example is in 1.0 x 1.0 coordinate space
+           (cairo-scale cr
+                        (gdk:gdk-window-width window)
+                        (gdk-window-height window))
+           ;; Drawing code goes here
+           (cairo-set-source-rgb cr 0.0 0.0 0.0)
+           (cairo-paint-with-alpha cr 0.5d0)
+           ;; Destroy the Cairo context
+           (cairo-destroy cr)
+           t)))
+        (gtk-widget-show-all window))))
 
 ;; (defun demo-cairo-mask ()
 ;;   (gtk:within-main-loop

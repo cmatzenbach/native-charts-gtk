@@ -1,38 +1,35 @@
 (in-package :native-charts-gtk)
 
-;; ;; main window
-;; (defvar window (make-instance 'gtk:gtk-window :type :toplevel :title "Bleep"))
-;; (defvar vbox (make-instance 'gtk:gtk-box :orientation :vertical
-;;                                          :spacing 25
-;;                                          :margin 25))
 
-;; ;; slider
-;; (defvar slider (make-instance 'gtk:gtk-scale
-;;                               :orientation :horizontal
-;;                               :draw-value nil
-;;                               :width-request 200
-;;                               :adjustment
-;;                               (make-instance 'gtk:gtk-adjustment
-;;                                              :value 440
-;;                                              :lower 20
-;;                                              :upper 20000
-;;                                              :step-increment 1)))
+;; simple app with a slider
+(defun demo-simple-slider ()
+  (gtk:within-main-loop
+    (let ((window (make-instance 'gtk:gtk-window :type :toplevel :title "Bleep"))
+          (vbox (make-instance 'gtk:gtk-box :orientation :vertical
+                                            :spacing 25
+                                            :margin 25))
+          (slider (make-instance 'gtk:gtk-scale
+                                 :orientation :horizontal
+                                 :draw-value nil
+                                 :width-request 200
+                                 :adjustment
+                                 (make-instance 'gtk:gtk-adjustment
+                                                :value 440
+                                                :lower 20
+                                                :upper 20000
+                                                :step-increment 1))))
+      (gobject:g-signal-connect window "destroy"
+                        (lambda (widget)
+                          (declare (ignore widget))
+                          (gtk:leave-gtk-main)))
+      (gtk:gtk-box-pack-start vbox slider)
+      (gtk:gtk-container-add window vbox)
+      (gtk:gtk-widget-show-all window))))
 
-;; (gtk:gtk-box-pack-start vbox slider)
 
-;; (gtk:within-main-loop
-;;  ;; quit program when window closed
-;;  (gobject:g-signal-connect window "destroy" (lambda (widget)
-;;                                               (declare (ignore widget))
-;;                                               (gtk:leave-gtk-main)))
-;;  ;; display gui
-;;  (gtk:gtk-container-add window vbox)
-;;  (gtk:gtk-widget-show-all window))
 
-(defun button-clicked (btn-num)
-  (format t "Button ~A was pressed my dude!~%" btn-num))
-
-(defun clickable-buttons-with-event-handlers-demo ()
+;; simple app with two buttons, each of which fires an event handler
+(defun demo-clickable-buttons-with-event-handlers ()
   ;; in the docs, this is example-upgraded-hello-world-2.
   (gtk:within-main-loop
     (let ((window (make-instance 'gtk-window
@@ -63,23 +60,12 @@
       (gtk:gtk-container-add window box)
       (gtk:gtk-widget-show-all window))))
 
-(defun cairo-stroke-callback (widget cr)
-  (let ((cr (pointer cr))
-        ;; Get the GdkWindow for the widget
-        (window (gtk:gtk-widget-window widget)))
-    ;; Clear surface
-    (cairo:cairo-set-source-rgb cr 1.0 1.0 1.0)
-    (cairo:cairo-paint cr)
-    ;; Example is in 1.0 x 1.0 coordinate space
-    (cairo:cairo-scale cr
-                       (gdk:gdk-window-get-width window)
-                       (gdk:gdk-window-get-height window))
-    ;; Drawing code goes here
-    (cairo:cairo-set-line-width cr 0.1)
-    (cairo:cairo-set-source-rgb cr 1.0 0.0 0.0)
-    (cairo:cairo-rectangle cr 0.25 0.25 0.5 0.5)
-    (cairo:cairo-stroke cr)))
+(defun button-clicked (btn-num)
+  (format t "Button ~A was pressed my dude!~%" btn-num))
 
+
+
+;; makes a thick red square in the middle of the window
 (defun demo-cairo-stroke ()
   (gtk:within-main-loop
     (let ((window (make-instance 'gtk-window
@@ -97,7 +83,25 @@
       (gtk:gtk-container-add window area)
       (gtk:gtk-widget-show-all window))))
 
+(defun cairo-stroke-callback (widget cr)
+  (let ((cr (pointer cr))
+        ;; Get the GdkWindow for the widget
+        (window (gtk:gtk-widget-window widget)))
+    ;; Clear surface
+    (cairo:cairo-set-source-rgb cr 1.0 1.0 1.0)
+    (cairo:cairo-paint cr)
+    ;; Example is in 1.0 x 1.0 coordinate space
+    (cairo:cairo-scale cr
+                       (gdk:gdk-window-get-width window)
+                       (gdk:gdk-window-get-height window))
+    ;; Drawing code goes here
+    (cairo:cairo-set-line-width cr 0.1)
+    (cairo:cairo-set-source-rgb cr 1.0 0.0 0.0)
+    (cairo:cairo-rectangle cr 0.25 0.25 0.5 0.5)
+    (cairo:cairo-stroke cr)))
 
+
+;; draws a giant x in middle of screen with four colored quadrants, x gets tinted per quadrant color
 (defun demo-cairo-set-source-rgba ()
   (gtk:within-main-loop
     (let ((window (make-instance 'gtk-window
@@ -105,50 +109,64 @@
                                  :title "Demo Cairo Set Source RGBA"
                                  :border-width 12
                                  :default-width 400
-                                 :default-height 400)))
+                                 :default-height 400))
+          (area (make-instance 'gtk-drawing-area)))
+      (gobject:g-signal-connect area "draw" #'cairo-set-source-rgba-callback)
       (gobject:g-signal-connect window "destroy"
                         (lambda (widget)
                           (declare (ignore widget))
                           (gtk:leave-gtk-main)))
-      ;; Signals used to handle the backing surface
-      (gobject:g-signal-connect window "draw"
-         (lambda (widget cr)
-           (let ((cr (pointer cr))
-                 ;; Get the GdkWindow for the widget
-                 (window (gtk-widget-window widget)))
-           ;; Clear surface
-           (cairo:cairo-set-source-rgb cr 1.0 1.0 1.0)
-           (cairo:cairo-paint cr)
-           ;; Example is in 1.0 x 1.0 coordinate space
-           (cairo:cairo-scale cr
-                        (gdk:gdk-window-get-width window)
-                        (gdk:gdk-window-get-height window))
-           ;; Drawing code goes here
-           (cairo:cairo-set-source-rgb cr 0 0 0)
-           (cairo:cairo-move-to cr 0 0)
-           (cairo:cairo-line-to cr 1 1)
-           (cairo:cairo-move-to cr 1 0)
-           (cairo:cairo-line-to cr 0 1)
-           (cairo:cairo-set-line-width cr 0.2)
-           (cairo:cairo-stroke cr)
-           (cairo:cairo-rectangle cr 0 0 0.5 0.5)
-           (cairo:cairo-set-source-rgba cr 1 0 0 0.80)
-           (cairo:cairo-fill cr)
-           (cairo:cairo-rectangle cr 0 0.5 0.5 0.5)
-           (cairo:cairo-set-source-rgba cr 0 1 0 0.60)
-           (cairo:cairo-fill cr)
-           (cairo:cairo-rectangle cr 0.5 0 0.5 0.5)
-           (cairo:cairo-set-source-rgba cr 0 0 1 0.40)
-           (cairo:cairo-fill cr)
-           ;; Destroy the Cairo context
-           (cairo:cairo-destroy cr)
-           t)))
-        (gtk:gtk-widget-show-all window))))
+      (gtk:gtk-container-add window area)
+      (gtk:gtk-widget-show-all window))))
 
-;; (demo-cairo-set-source-rgba)
+(defun cairo-set-source-rgba-callback (widget cr)
+  (let ((cr (pointer cr))
+        ;; Get the GdkWindow for the widget
+        (window (gtk:gtk-widget-window widget)))
+    ;; Clear surface
+    (cairo:cairo-set-source-rgb cr 1.0 1.0 1.0)
+    (cairo:cairo-paint cr)
+    ;; Example is in 1.0 x 1.0 coordinate space
+    (cairo:cairo-scale cr
+                       (gdk:gdk-window-get-width window)
+                       (gdk:gdk-window-get-height window))
+    ;; Drawing code goes here
+    (cairo:cairo-set-source-rgb cr 0 0 0)
+    (cairo:cairo-move-to cr 0 0)
+    (cairo:cairo-line-to cr 1 1)
+    (cairo:cairo-move-to cr 1 0)
+    (cairo:cairo-line-to cr 0 1)
+    (cairo:cairo-set-line-width cr 0.2)
+    (cairo:cairo-stroke cr)
+    (cairo:cairo-rectangle cr 0 0 0.5 0.5)
+    (cairo:cairo-set-source-rgba cr 1 0 0 0.80)
+    (cairo:cairo-fill cr)
+    (cairo:cairo-rectangle cr 0 0.5 0.5 0.5)
+    (cairo:cairo-set-source-rgba cr 0 1 0 0.60)
+    (cairo:cairo-fill cr)
+    (cairo:cairo-rectangle cr 0.5 0 0.5 0.5)
+    (cairo:cairo-set-source-rgba cr 0 0 1 0.40)
+    (cairo:cairo-fill cr)))
 
 
-  ;; Signals used to handle the backing surface
+;; demonstrates the effect of adding a gradient over existing colored components
+(defun demo-cairo-set-source-gradient ()
+  (gtk:within-main-loop
+    (let ((window (make-instance 'gtk-window
+                                 :type :toplevel
+                                 :title "Demo Cairo Set Source Gradient"
+                                 :border-width 12
+                                 :default-width 400
+                                 :default-height 400))
+          (area (make-instance 'gtk-drawing-area)))
+      (gobject:g-signal-connect area "draw" #'cairo-set-source-gradient)
+      (gobject:g-signal-connect window "destroy"
+                                (lambda (widget)
+                                  (declare (ignore widget))
+                                  (gtk:leave-gtk-main)))
+      (gtk:gtk-container-add window area)
+      (gtk:gtk-widget-show-all window))))
+
 (defun cairo-set-source-gradient (widget cr)
   (let ((cr (pointer cr))
         ;; Get the GdkWindow for the widget
@@ -184,23 +202,26 @@
       (cairo:cairo-set-source cr linpat)
       (cairo:cairo-fill cr))))
 
-  (defun demo-cairo-set-source-gradient ()
-    (gtk:within-main-loop
-      (let ((window (make-instance 'gtk-window
-                                   :type :toplevel
-                                   :title "Demo Cairo Set Source Gradient"
-                                   :border-width 12
-                                   :default-width 400
-                                   :default-height 400))
-            (area (make-instance 'gtk-drawing-area)))
-        (gobject:g-signal-connect area "draw" #'cairo-set-source-gradient)
-        (gobject:g-signal-connect window "destroy"
-                                  (lambda (widget)
-                                    (declare (ignore widget))
-                                    (gtk:leave-gtk-main)))
-        (gtk:gtk-container-add window area)
-        (gtk:gtk-widget-show-all window))))
 
+;; demonstrates creating different mods of retangular shapes and how to align them to lines drawn on screen
+(defun demo-cairo-drawing-caps ()
+  (gtk:within-main-loop
+    (let ((window (make-instance 'gtk-window
+                                 :type :toplevel
+                                 :title "Cairo Drawing Caps"
+                                 :default-width 400
+                                 :default-height 300))
+          (area (make-instance 'gtk-drawing-area)))
+      ;; Signal handler for the drawing area
+      (gobject:g-signal-connect area "draw" #'cairo-drawing-caps)
+      ;; Signal handler for the window to handle the signal "destroy".
+      (gobject:g-signal-connect window "destroy"
+                        (lambda (widget)
+                          (declare (ignore widget))
+                          (gtk:leave-gtk-main)))
+      ;; Show the window.
+      (gtk:gtk-container-add window area)
+      (gtk:gtk-widget-show-all window))))
 
 (defun cairo-drawing-caps (widget cr)
   (let* ((cr (pointer cr))
@@ -248,25 +269,6 @@
     (cairo:cairo-line-to cr (+ (- width border) (/ line-width 2))
                       (+ (* 3 offset) line-width))
     (cairo:cairo-stroke cr)))
-
-(defun demo-cairo-drawing-caps ()
-  (gtk:within-main-loop
-    (let ((window (make-instance 'gtk-window
-                                 :type :toplevel
-                                 :title "Cairo Drawing Caps"
-                                 :default-width 400
-                                 :default-height 300))
-          (area (make-instance 'gtk-drawing-area)))
-      ;; Signal handler for the drawing area
-      (gobject:g-signal-connect area "draw" #'cairo-drawing-caps)
-      ;; Signal handler for the window to handle the signal "destroy".
-      (gobject:g-signal-connect window "destroy"
-                        (lambda (widget)
-                          (declare (ignore widget))
-                          (gtk:leave-gtk-main)))
-      ;; Show the window.
-      (gtk:gtk-container-add window area)
-      (gtk:gtk-widget-show-all window))))
 
 ;; (defun demo-cairo-fill ()
 ;;   (gtk:within-main-loop

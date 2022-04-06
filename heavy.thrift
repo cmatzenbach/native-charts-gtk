@@ -73,7 +73,6 @@ enum TTableRefreshIntervalType {
   1: i64 int_val;
   2: double real_val;
   3: string str_val;
-  4: list<TDatum> arr_val;
 }
 
 struct TDatum {
@@ -105,7 +104,6 @@ struct TRow {
   1: list<i64> int_col;
   2: list<double> real_col;
   3: list<string> str_col;
-  4: list<TColumn> arr_col;
 }
 
 struct TColumn {

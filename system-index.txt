@@ -1,0 +1,6 @@
+native-charts-gtk.asd
+thrift/gen-cl/heavy/thrift-gen-heavy.asd
+thrift/gen-cl/common/thrift-gen-common.asd
+thrift/gen-cl/completion_hints/thrift-gen-completion_hints.asd
+thrift/gen-cl/extension_functions/thrift-gen-extension_functions.asd
+thrift/gen-cl/serialized_result_set/thrift-gen-serialized_result_set.asd

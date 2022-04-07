@@ -354,39 +354,41 @@
 
 
 
-;; 
+;; ??? Not sure what this is supposed to be ???
 (defun demo-cairo-paint ()
   (gtk:within-main-loop
     (let ((window (make-instance 'gtk-window
-                                 :type :toplevel
-                                 :title "Demo Cairo Paint"
-                                 :border-width 12
-                                 :default-width 400
-                                 :default-height 400)))
+                                  :type :toplevel
+                                  :title "Demo Cairo Paint"
+                                  :border-width 12
+                                  :default-width 400
+                                  :default-height 400))
+          (area (make-instance 'gtk-drawing-area)))
       (gobject:g-signal-connect window "destroy"
-                        (lambda (widget)
-                          (declare (ignore widget))
-                          (leave-gtk-main)))
+                                (lambda (widget)
+                                  (declare (ignore widget))
+                                  (leave-gtk-main)))
+      (gobject:g-signal-connect area "draw" #'cairo-paint-callback)
       ;; Signals used to handle the backing surface
-      (gobject:g-signal-connect window "draw"
-         (lambda (widget cr)
-           (let ((cr (pointer cr))
-                 ;; Get the GdkWindow for the widget
-                 (window (gtk-widget-window widget)))
-           ;; Clear surface
-           (cairo-set-source-rgb cr 1.0 1.0 1.0)
-           (cairo-paint cr)
-           ;; Example is in 1.0 x 1.0 coordinate space
-           (cairo-scale cr
-                        (gdk:gdk-window-width window)
-                        (gdk-window-height window))
-           ;; Drawing code goes here
-           (cairo-set-source-rgb cr 0.0 0.0 0.0)
-           (cairo-paint-with-alpha cr 0.5d0)
-           ;; Destroy the Cairo context
-           (cairo-destroy cr)
-           t)))
-        (gtk-widget-show-all window))))
+      (gtk:gtk-container-add window area)
+      (gtk:gtk-widget-show-all window))))
+
+(defun cairo-paint-callback (widget cr)
+  (let ((cr (pointer cr))
+        ;; Get the GdkWindow for the widget
+        (window (gtk:gtk-widget-window widget)))
+    ;; Clear surface
+    (cairo:cairo-set-source-rgb cr 1.0 1.0 1.0)
+    (cairo:cairo-paint cr)
+    ;; Example is in 1.0 x 1.0 coordinate space
+    (cairo:cairo-scale cr
+                       (gdk:gdk-window-get-width window)
+                       (gdk:gdk-window-get-height window))
+    ;; Drawing code goes here
+    (cairo:cairo-set-source-rgb cr 0.0 0.0 0.0)
+    (cairo:cairo-paint-with-alpha cr 0.5d0)))
+
+
 
 ;; (defun demo-cairo-mask ()
 ;;   (gtk:within-main-loop

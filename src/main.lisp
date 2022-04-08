@@ -61,7 +61,7 @@
       (gtk:gtk-widget-show-all window))))
 
 (defun button-clicked (btn-num)
-  (format t "Button ~A was pressed my dude!~%" btn-num))
+  (format t "Button ~A was clicked!~%" btn-num))
 
 
 

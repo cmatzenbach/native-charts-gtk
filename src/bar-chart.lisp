@@ -4,10 +4,10 @@
 (defun render-bar-chart ()
   (gtk:within-main-loop
     (let ((window (make-instance 'gtk-window
-                                 :type :toplevel
-                                 :title "Cairo Drawing Caps"
-                                 :default-width 400
-                                 :default-height 300))
+                                  :type :toplevel
+                                  :title "Cairo Drawing Caps"
+                                  :default-width 400
+                                  :default-height 300))
           (area (make-instance 'gtk-drawing-area)))
       ;; Signal handler for the drawing area
       (gobject:g-signal-connect area "draw" #'cairo-draw-bar-chart)
@@ -49,7 +49,10 @@
     (cairo:cairo-stroke cr)
 
     ;; draw bars and labels
-    (draw-bars cr width height margin number-bars data)))
+    (draw-bars cr width height margin number-bars data)
+
+    (cairo:cairo-move-to cr (- (/ width 2) 150) (+ height 70))
+    (cairo:cairo-show-text cr "Most goals per season, defenseman")))
 
 (defun draw-bars (cr width height margin number-bars data)
   (loop for row in data
@@ -67,10 +70,20 @@
              (cairo:cairo-set-source-rgb cr 0.0 0.0 0.0)
              (cairo:cairo-select-font-face cr "Georgia" :normal :normal)
              (cairo:cairo-set-font-size cr 20.0)
+
+             ;; show name/season labels under x-axis
              (cairo:cairo-move-to cr
                                   (if (= i 0)
                                       (+ margin 5)
                                       (+ (* (/ i number-bars) width) margin 5))
                                   (+ 25 height))
              (print (getf row :|lastname|))
-             (cairo:cairo-show-text cr (concatenate 'string (getf row :|lastname|) " " (write-to-string (getf row :|year|)))))))
+             (cairo:cairo-show-text cr (concatenate 'string (getf row :|lastname|) " " (write-to-string (getf row :|year|))))
+             
+             ;; show number of goals above bar
+             (cairo:cairo-move-to cr
+                                  (if (= i 0)
+                                      (+ margin 25)
+                                      (+ (* (/ i number-bars) width) margin 25))
+                                  (- height (* 17 (getf row :|g|)) 5))
+             (cairo:cairo-show-text cr (write-to-string (getf row :|g|))))))

@@ -8,8 +8,7 @@
                                  :title "Cairo Drawing Caps"
                                  :default-width 400
                                  :default-height 300))
-          (area (make-instance 'gtk-drawing-area))
-          )
+          (area (make-instance 'gtk-drawing-area)))
       ;; Signal handler for the drawing area
       (gobject:g-signal-connect area "draw" #'cairo-draw-bar-chart)
       ;; Signal handler for the window to handle the signal "destroy".
@@ -50,8 +49,7 @@
     (cairo:cairo-stroke cr)
 
     ;; draw bars and labels
-    (draw-bars cr width height margin number-bars data)
-    ))
+    (draw-bars cr width height margin number-bars data)))
 
 (defun draw-bars (cr width height margin number-bars data)
   (loop for row in data
@@ -71,8 +69,8 @@
              (cairo:cairo-set-font-size cr 20.0)
              (cairo:cairo-move-to cr
                                   (if (= i 0)
-                                      (+ margin 15)
-                                      (+ (* (/ i number-bars) width) margin 15))
+                                      (+ margin 5)
+                                      (+ (* (/ i number-bars) width) margin 5))
                                   (+ 25 height))
              (print (getf row :|lastname|))
-             (cairo:cairo-show-text cr (getf row :|lastname|)))))
+             (cairo:cairo-show-text cr (concatenate 'string (getf row :|lastname|) " " (write-to-string (getf row :|year|)))))))

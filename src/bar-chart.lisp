@@ -24,30 +24,32 @@
 (defun cairo-draw-bar-chart (widget cr)
   (let* ((cr (pointer cr))
          (width (gtk:gtk-widget-get-allocated-width widget))
-         (height (gtk:gtk-widget-get-allocated-height widget))
-         (line-width (truncate (/ height 10))))
-    ;; color of bars
-    ;; (cairo:cairo-set-source-rgb cr 1.0 0.0 0.0)
-    ;; set bar width, this will depend on how many bars i want to display
-    ;; (cairo:cairo-set-line-width cr line-width)
+         (height (- (gtk:gtk-widget-get-allocated-height widget) 100))
+         (line-width (truncate (/ height 10)))
+         (margin 40)
+         (number-bars 5))
     (format t "width: ~d | height: ~d" width height)
-    ;; (cairo:cairo-move-to cr 20 20)
-    ;; x and y will represent where the top of the bar is
-    ;; the width and height tell how far to draw DOWN the screen to
-    ;; thus, once i calculate the size of a bar, to figure out it's y I will need to do:
-    ;; will need to store the data in lists with width and height properties
-    (cairo:cairo-rectangle cr 25 (- height 500) (- (/ width 2) 25) 500)
-    (cairo:cairo-set-source-rgb cr 1.0 0.0 0.0)
-    (cairo:cairo-fill cr)
-    (cairo:cairo-rectangle cr (+ (/ width 2) 25) (- height 300) (- width 25) 300)
-    (cairo:cairo-set-source-rgb cr 1.0 0.0 0.0)
-    (cairo:cairo-fill cr)
-    ;; lets try and draw our first bar
-    ;; (cairo:cairo-set-line-cap cr :butt)
-    ;; (cairo:cairo-move-to cr 200 100)
-    ;; (cairo:cairo-line-to cr 400 30)
-    ;; (cairo:cairo-stroke cr)
+    (draw-bars cr width height margin number-bars)
+    ;; lets try drawing a line
+    (cairo:cairo-set-line-cap cr :butt)
+    (cairo:cairo-move-to cr 200 30)
+    (cairo:cairo-line-to cr 400 30)
+    (cairo:cairo-set-source-rgb cr 0.0 1.0 0.0)
+    (cairo:cairo-stroke cr)
     ))
+
+(defun draw-bars (cr width height margin number-bars)
+  (loop for a from 0 to (- number-bars 1)
+        do (progn 
+             (cairo:cairo-rectangle cr
+                                    (if (= a 0)
+                                        margin
+                                        (+ (* (/ a number-bars) width) margin))
+                                    (- height 500)
+                                    (- (/ width number-bars) (* margin 2))
+                                    500)
+             (cairo:cairo-set-source-rgb cr 1.0 0.0 0.0)
+             (cairo:cairo-fill cr))))
 
 (defun cairo-draw-cb (widget cr)
   (let* ((cr (pointer cr))

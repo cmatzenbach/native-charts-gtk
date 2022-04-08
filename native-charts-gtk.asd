@@ -2,13 +2,11 @@
   :version "0.1.0"
   :author "Chris Matzenbach"
   :license ""
-  :depends-on (:cl-cffi-gtk :de.setf.utility :thrift :thrift-gen-heavy :iterate)
-  ;; :components ((:module "src"
-  ;;               :components
-  ;;               ((:file "packages") 
-  ;;                (:file "main" :depends-on ("packages")))))
+  :depends-on (:cl-cffi-gtk :mito :cl-dbi)
   :components ((:file "packages")
-               (:file "src/main" :depends-on ("packages")))
+               (:file "src/main" :depends-on ("packages"))
+               (:file "src/data-middleware" :depends-on ("packages"))
+               (:file "src/bar-chart" :depends-on ("packages")))
   :description "HEAVY.AI 2022 Hackathon Project"
   :in-order-to ((test-op (test-op "native-charts-gtk/tests"))))
 
